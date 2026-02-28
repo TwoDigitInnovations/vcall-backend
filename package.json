@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
-    "start": "pm2 start server.js -i max -f  --name 'vcall-api'",
+    "start": "pm2 start server.js --name vcall-api -i 1",
     "kill": "pm2 kill vcall-api",
     "logs": "pm2 log vcall-api",
     "restart": "pm2 restart vcall-api",
