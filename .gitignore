@@ -9,6 +9,8 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
+firebase-service-account.json
+
 # Runtime data
 pids
 *.pid
