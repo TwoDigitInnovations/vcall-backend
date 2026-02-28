@@ -1,0 +1,12 @@
+{
+    "database": {
+        "url": "mongodb+srv://service:{password}@cluster0.cvxtn.mongodb.net/serviceProvider?retryWrites=true&w=majority"
+    },
+    "jwt": {
+        "secretOrKey": "PROD_SECRET",
+        "issuer": "service",
+        "audience": "service.in",
+        "expiresIn": "7d",
+        "algorithm": "HS256"
+    }
+}

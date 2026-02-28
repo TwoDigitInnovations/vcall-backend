@@ -1,0 +1,10 @@
+'use strict';
+const ok = require('./ok');
+const error = require('./error');
+const unAuthorize = require('./unAuthorize');
+const created = require('./created');
+const conflict = require('./conflict');
+const notFound = require('./notFound');
+const badReq = require('./badReq');
+const forbidden = require('./forbidden');
+module.exports = { ok, forbidden, error, unAuthorize, created, badReq, notFound, conflict };
