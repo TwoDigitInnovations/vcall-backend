@@ -26,6 +26,7 @@
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.2.2",
     "no-console": "^2.0.0",
+    "node-fetch": "^3.3.2",
     "nodemon": "^3.1.14",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
