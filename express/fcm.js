@@ -1,15 +1,29 @@
 'use strict';
 
-// const fetch = require('node-fetch');
 const path = require('path');
 const { GoogleAuth } = require('google-auth-library');
 
 const FIREBASE_PROJECT_ID = 'digit-vcall';
-// const SERVICE_ACCOUNT_PATH = path.join(__dirname, 'firebase-service-account.json');  // e.g. 'digit-vcall'
 const SERVICE_ACCOUNT_PATH = path.join(__dirname, '..', 'firebase-service-account.json');
 
 let _fcmAccessToken = null;
 let _fcmTokenExpiresAt = 0;
+
+// ── Safe fetch — works with node-fetch v2, v3, and Node 18+ native fetch ─────
+async function safeFetch(url, options) {
+    // Node 18+ has native fetch
+    if (typeof globalThis.fetch === 'function') {
+        return globalThis.fetch(url, options);
+    }
+    // node-fetch v2 (CommonJS)
+    try {
+        const nodeFetch = require('node-fetch');
+        const fn = nodeFetch.default || nodeFetch;
+        return fn(url, options);
+    } catch (e) {
+        throw new Error('No fetch available. Run: npm install node-fetch@2');
+    }
+}
 
 async function getFcmAccessToken() {
     if (_fcmAccessToken && Date.now() < _fcmTokenExpiresAt - 300000) {
@@ -38,43 +52,35 @@ async function sendFcmV1(fcmToken, callData) {
     const { callerId, callerName, roomId } = callData;
     const url = `https://fcm.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/messages:send`;
 
-    const body = {
+    const body = JSON.stringify({
         message: {
             token: fcmToken,
-            notification: {
-                title: `📞 ${callerName || callerId} is calling`,
-                body: 'Tap to answer',
-            },
+
+            // DATA ONLY — no notification block
+            // This ensures onMessageReceived() fires even when app is killed
+            // Our VcallFirebaseMessagingService handles the UI natively
             data: {
                 type: 'incoming_call',
                 callerId: callerId || '',
                 callerName: callerName || '',
                 roomId: roomId || '',
             },
+
             android: {
                 priority: 'high',
                 ttl: '60s',
-                notification: {
-                    channel_id: 'incoming_call_v3',
-                    sound: 'ringtone',
-                    visibility: 'PUBLIC',
-                    default_vibrate_timings: true,
-                    notification_priority: 'PRIORITY_MAX',
-                    default_sound: true,
-                    click_action: 'INCOMING_CALL_ANSWER',
-                },
             },
         },
-    };
+    });
 
     try {
-        const res = await fetch(url, {
+        const res = await safeFetch(url, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${accessToken}`,
             },
-            body: JSON.stringify(body),
+            body,
         });
         const result = await res.json();
         if (result.name) return true;
